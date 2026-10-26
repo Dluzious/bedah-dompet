@@ -1,35 +1,23 @@
-# Bedah Dompet: ikon aplikasi
+# Bedah Dompet: aplikasi terpasang (laptop dan HP)
 
-Halaman kecil ini membungkus aplikasi Bedah Dompet (Google Apps Script) supaya bisa dipasang sebagai ikon di layar utama HP, lengkap dengan logo dan nama "Bedah Dompet".
+Halaman ini membuat Bedah Dompet bisa dipasang seperti aplikasi: punya ikon di desktop atau layar HP,
+terbuka di jendela sendiri tanpa tab dan bilah alamat browser. Isinya tetap aplikasi pusat di Apps Script;
+tidak ada data keuangan yang tersimpan di sini.
 
-Halaman ini tidak menyimpan atau membaca data keuangan apa pun. Isi aplikasi tetap dimuat langsung dari Google Apps Script, dan datanya tetap berada di Google Sheet milik pemilik akun.
+1. Isi URL aplikasi pusat (berakhiran `/exec`) di **dua** tempat, dengan alamat yang persis sama:
+   - `index.html`: ganti `TEMPEL_ALAMAT_EXEC_DI_SINI` (di dalam tanda kutip).
+   - `bedah-dompet.mobileconfig`: ganti `TEMPEL_ALAMAT_EXEC_DI_SINI` (di antara `<string>` dan `</string>`).
+   Bila alamat di profil kosong atau berbeda, iPhone otomatis memakai cara lama (ikon tanpa logo).
+2. Unggah semua file folder ini ke repository GitHub publik (misalnya `bedah-dompet`), lalu aktifkan
+   Settings › Pages › Deploy from a branch › `main` › `/ (root)`.
+3. Alamat untuk pembeli: `https://USERNAME.github.io/bedah-dompet/`
 
-## Isi folder
+Pemasangan oleh pembeli:
+- Laptop (Chrome/Edge): buka alamat di atas › ikon pasang di ujung kanan bilah alamat › Instal.
+- Android (Chrome): menu ⋮ › Instal aplikasi.
+- iPhone (Safari): buka alamat di atas › **Pasang ikon Bedah Dompet** › Izinkan › Pengaturan › Profil Telah Diunduh ›
+  Pasang. Ikon berlogo dan terbuka layar penuh. Cadangan tanpa profil: tautan "Pakai cara lain tanpa profil".
+- iPad (Safari): Bagikan › Tambah ke Layar Utama.
 
-| File | Fungsi |
-| --- | --- |
-| `index.html` | Halaman pembungkus: membuka aplikasi, layar "Hubungkan", layar offline |
-| `manifest.webmanifest` | Nama, warna, dan ikon saat dipasang di Android |
-| `sw.js` | Menyimpan halaman pembungkus agar ikon cepat terbuka |
-| `icon-192.png`, `icon-512.png` | Ikon utama |
-| `icon-maskable-192.png`, `icon-maskable-512.png` | Ikon Android yang aman dipotong bulat atau kotak |
-| `apple-touch-icon.png` | Ikon iPhone dan iPad |
-| `favicon.ico`, `favicon-32.png` | Ikon tab browser |
-
-## Cara pakai singkat
-
-1. Unggah semua file di folder ini ke repository GitHub baru, misalnya `bedah-dompet`.
-2. Buka **Settings → Pages**, pilih **Deploy from a branch**, branch `main`, folder `/ (root)`, lalu **Save**.
-3. Bagikan tautan dengan format berikut:
-
-```
-https://USERNAME.github.io/bedah-dompet/?app=ALAMAT_EXEC
-```
-
-`ALAMAT_EXEC` adalah URL aplikasi web dari Apps Script (berakhiran `/exec`).
-
-4. Penerima membuka tautan itu sekali, lalu memilih **Tambahkan ke Layar Utama** (iPhone: tombol Bagikan di Safari; Android: menu ⋮ di Chrome).
-
-Bila halaman ini hanya untuk satu aplikasi, isi `ALAMAT_BAWAAN` di `index.html` agar tautan tidak perlu `?app=`.
-
-Untuk mengganti alamat yang tersimpan di sebuah HP, buka `https://USERNAME.github.io/bedah-dompet/?atur`.
+Bila alamat `/exec` berubah, perbarui kedua file. Pembeli iPhone perlu memasang profil baru
+(profil lama tetap mengarah ke alamat lama).

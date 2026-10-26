@@ -1,33 +1,27 @@
-/* Bedah Dompet: service worker kecil untuk "kulit" aplikasi.
- * Hanya menyimpan halaman pembungkus dan ikon agar ikon di layar utama cepat terbuka.
- * Data keuangan tidak pernah lewat sini: isi aplikasi tetap dimuat langsung dari Google Apps Script. */
-var CACHE = 'bedah-dompet-kulit-v1';
-var FILE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
-  './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
+/* Menyimpan halaman pembungkus dan ikon agar aplikasi terpasang cepat terbuka.
+   Data keuangan tidak pernah disimpan di sini: isinya dibuka langsung dari Google. */
+var CACHE = 'bedah-dompet-pembungkus-v3';
+var FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './favicon-32.png', './favicon.ico'];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILE); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
 });
-
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (ks) {
-    return Promise.all(ks.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+  e.waitUntil(caches.keys().then(function (k) {
+    return Promise.all(k.filter(function (n) { return n !== CACHE; }).map(function (n) { return caches.delete(n); }));
   }).then(function () { return self.clients.claim(); }));
 });
-
+/* Jaringan dulu (agar pembaruan langsung terpakai), cadangan dari cache bila offline */
 self.addEventListener('fetch', function (e) {
-  var req = e.request, url = new URL(req.url);
-  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
-  if (req.mode === 'navigate') {
-    // Utamakan versi terbaru dari internet; pakai salinan bila sedang offline.
-    e.respondWith(fetch(req).then(function (res) {
-      if (res.ok) {
-        var salin = res.clone();
-        caches.open(CACHE).then(function (c) { c.put('./index.html', salin); });
-      }
-      return res;
-    }).catch(function () { return caches.match('./index.html'); }));
-    return;
-  }
-  e.respondWith(caches.match(req, { ignoreSearch: true }).then(function (r) { return r || fetch(req); }));
+  var u = new URL(e.request.url);
+  if (e.request.method !== 'GET' || u.origin !== self.location.origin) return;
+  /* Profil ikon iPhone selalu diambil langsung, agar alamat di dalamnya tidak pernah versi lama */
+  if (/\.mobileconfig$/.test(u.pathname)) return;
+  e.respondWith(fetch(e.request).then(function (r) {
+    var salin = r.clone();
+    caches.open(CACHE).then(function (c) { c.put(e.request, salin); });
+    return r;
+  }).catch(function () {
+    return caches.match(e.request).then(function (r) { return r || caches.match('./index.html'); });
+  }));
 });
